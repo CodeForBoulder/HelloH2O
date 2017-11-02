@@ -11,3 +11,9 @@
 ```
 
 > App for Real Time Water Usage per Household.
+
+Goals:
+
+- Building endpoints for both the global and user oriented data.
+
+- Finding or creating a database or using data entry.

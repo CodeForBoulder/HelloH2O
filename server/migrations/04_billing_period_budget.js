@@ -6,7 +6,7 @@ exports.up = (knex) => {
     table.string('meter_date').notNullable();
 
     // table references
-    table.integer(full_period_id).unsigned().references('id').inTable(first_period).onDelete('CASCADE');
+    // table.integer(full_period_id).unsigned().references('id').onDelete('CASCADE');
 
   });
 };
