@@ -25,4 +25,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'com.android.support:design:23.2.0'
     compile 'com.jjoe64:graphview:4.2.1'
+
+    compile 'com.google.android.gms:play-services:8.4.0'
+    //compile 'com.google.android.gms:play-services-location:11.0.0'
 }

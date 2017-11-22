@@ -142,8 +142,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private static List<WaterBlogFragment> fragments = new ArrayList(){{
+        add(new HomeScreen());
         add(new Registration());
-        add(new Calendar());
+        //add(new Calendar());
         add(new WaterUsageGraph());
         add(new USGSStreamerMobile());
     }};
