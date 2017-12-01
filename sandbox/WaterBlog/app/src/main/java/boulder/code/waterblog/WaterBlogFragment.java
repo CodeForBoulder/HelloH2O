@@ -7,4 +7,15 @@ import android.support.v4.app.Fragment;
  */
 public abstract class WaterBlogFragment extends Fragment {
     public abstract String title();
+
+    // Allows the sub-views to control navigation
+    protected OnNavigateListener mCallback;
+    public interface OnNavigateListener {
+        public void navigateTo(String key);
+    }
+
+    public void setOnNavigateListener(OnNavigateListener mCallback) {
+        this.mCallback = mCallback;
+    }
+
 }

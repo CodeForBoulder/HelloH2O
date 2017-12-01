@@ -1,26 +1,27 @@
 package boulder.code.waterblog;
 
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import android.view.WindowManager;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+import boulder.code.waterblog.boulder.code.waterblog.utils.Constants;
+
+public class MainActivity extends AppCompatActivity implements WaterBlogFragment.OnNavigateListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -36,14 +37,28 @@ public class MainActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    private static Map<String, WaterBlogFragment> fragments;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        //getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        if(fragments == null) {
+            fragments = new LinkedHashMap(){{
+                put(Constants.HOME, new HomeScreen());
+                put(Constants.REGISTRATION, new Registration());
+                //add(Constants.CALENDAR, new Calendar());
+                put(Constants.WATER_USAGE, new WaterUsageGraph());
+                put(Constants.USGS_STREAMER, new USGSStreamerMobile());
+                put(Constants.WATERSHED, new WatershedMobile());
+            }};
+
+            for(WaterBlogFragment fragment : fragments.values()) {
+                fragment.setOnNavigateListener(this);
+            }
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -62,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                setTitle(getResources().getString(R.string.app_name) + " - " + fragments.get(position).title());
+                setTitle(getResources().getString(R.string.app_name) + " - " + getFragment(position).title());
             }
 
             @Override
@@ -81,30 +96,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
-/*
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-*/
 
     /**
      * A placeholder fragment containing a simple view.
@@ -141,13 +132,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static List<WaterBlogFragment> fragments = new ArrayList(){{
-        add(new HomeScreen());
-        add(new Registration());
-        //add(new Calendar());
-        add(new WaterUsageGraph());
-        add(new USGSStreamerMobile());
-    }};
+    private static WaterBlogFragment getFragment(int position) {
+        return fragments == null ? null : (WaterBlogFragment)fragments.values().toArray()[position];
+    }
+
+    /* Allows a fragment to control navigation to another fragment */
+    @Override
+    public void navigateTo(String key) {
+        mViewPager.setCurrentItem((new ArrayList<>(fragments.keySet())).indexOf(key));
+    }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
@@ -157,9 +150,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            System.out.println("Got here: " + position);
-
-            return fragments.get(position);
+            return getFragment(position);
         }
 
         @Override
@@ -169,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return fragments.get(position).title();
+            return getFragment(position).title();
         }
 
     }

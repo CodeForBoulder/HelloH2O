@@ -11,26 +11,32 @@ import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
-//import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import boulder.code.waterblog.boulder.code.waterblog.utils.Constants;
 
 public class HomeScreen extends WaterBlogFragment implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private MarkerOptions marker = new MarkerOptions();
-    //private FusedLocationProviderClient mFusedLocationClient;
+    private Marker marker;
+    private GoogleApiClient mGoogleApiClient;
+    private View view;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        View view = inflater.inflate(R.layout.home_screen, container, false);
+        if (view != null) { return view; }
+
+        view = inflater.inflate(R.layout.home_screen, container, false);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         FragmentManager fm = getActivity().getSupportFragmentManager();/// getChildFragmentManager();
@@ -41,7 +47,34 @@ public class HomeScreen extends WaterBlogFragment implements OnMapReadyCallback 
         }
         supportMapFragment.getMapAsync(this);
 
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(getContext())
+                    //.addConnectionCallbacks()
+                    //.addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
+        view.findViewById(R.id.my_usage).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mCallback != null) {
+                    mCallback.navigateTo(Constants.WATER_USAGE);
+                }
+            }
+        });
+
+        view.findViewById(R.id.watershed).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mCallback != null) {
+                    mCallback.navigateTo(Constants.WATERSHED);
+                }
+            }
+        });
+
         /*
+        LocationServices.FusedLocationApi.getLastLocation()
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
         mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
@@ -52,8 +85,20 @@ public class HomeScreen extends WaterBlogFragment implements OnMapReadyCallback 
             }
         });
         */
-        
+
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
     }
 
     /**
@@ -69,17 +114,46 @@ public class HomeScreen extends WaterBlogFragment implements OnMapReadyCallback 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        marker.position(new LatLng(-34, 151));
-        mMap.addMarker(marker);
+        marker = mMap.addMarker(new MarkerOptions().position(new LatLng(39.7392, -104.9903)));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 11));
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(final LatLng latLng) {
+                Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                if (mLastLocation != null) {
+                    Toast.makeText(getContext(), "" + mLastLocation.getLatitude(), Toast.LENGTH_LONG).show();
+                } else {
+                    // Use the Builder class for convenient dialog construction
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage("Set location")
+                            .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    marker.setPosition(latLng);
+                                    mMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+                                }
+                            })
+                            .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // User cancelled the dialog
+                                }
+                            });
+                    // Create the AlertDialog object and return it
+                    builder.create().show();
+                }
+            }
+        });
 
+        /*
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage("Choose your location")
                 .setPositiveButton("USE PHONE LOCATION", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // FIRE ZE MISSILES!
+                        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                        if (mLastLocation != null) {
+                            Toast.makeText(getContext(), "" + mLastLocation.getLatitude(), Toast.LENGTH_LONG).show();
+                        }
                     }
                 })
                 .setNegativeButton("MANUAL", new DialogInterface.OnClickListener() {
@@ -89,6 +163,8 @@ public class HomeScreen extends WaterBlogFragment implements OnMapReadyCallback 
                 });
         // Create the AlertDialog object and return it
         builder.create().show();
+        */
+
     }
 
     @Override
