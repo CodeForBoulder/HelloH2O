@@ -12,6 +12,10 @@
 # 🍜 Minimal Viable Product 🏔
 _____________________________
 
+## ARCHIVE UPDATE
+
+This project lost traction and will be archived. If you find this and wish to pick it up, please [join us](http://www.codeforboulder.org/) and consider [resubmitting a proposal](http://www.codeforboulder.org/project-proposals).
+
 ## Resources:
 - [TrelloBoard](https://trello.com/b/kl3gHU9R/code-for-boulder-water-everywhere)
 - [Google Drive](https://drive.google.com/drive/folders/0BwBJbIQ_4ZdSS2t0bWdTTUwwcVU)
